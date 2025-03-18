@@ -1,0 +1,111 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background: #e0e5ec;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.container {
+    padding: 20px;
+    width: 100%;
+    max-width: 500px;
+}
+
+.form-card {
+    background: #e0e5ec;
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 10px 10px 20px #b8bec5,
+                -10px -10px 20px #ffffff;
+}
+
+h1 {
+    color: #4a4a4a;
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 28px;
+}
+
+.input-group {
+    margin-bottom: 25px;
+}
+
+label {
+    display: block;
+    color: #666;
+    margin-bottom: 10px;
+    font-size: 16px;
+}
+
+input[type="text"],
+input[type="time"],
+input[type="file"] {
+    width: 100%;
+    padding: 15px;
+    border: none;
+    border-radius: 12px;
+    background: #e0e5ec;
+    box-shadow: inset 5px 5px 10px #b8bec5,
+                inset -5px -5px 10px #ffffff;
+    color: #333;
+    font-size: 16px;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+input[type="file"] {
+    padding: 10px;
+}
+
+input:focus {
+    box-shadow: inset 3px 3px 5px #b8bec5,
+                inset -3px -3px 5px #ffffff;
+}
+
+.submit-btn {
+    width: 100%;
+    padding: 15px;
+    border: none;
+    border-radius: 12px;
+    background: #e0e5ec;
+    box-shadow: 5px 5px 10px #b8bec5,
+                -5px -5px 10px #ffffff;
+    color: #4a90e2;
+    font-size: 18px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.submit-btn:hover {
+    box-shadow: 3px 3px 5px #b8bec5,
+                -3px -3px 5px #ffffff;
+}
+
+.submit-btn:active {
+    box-shadow: inset 5px 5px 10px #b8bec5,
+                inset -5px -5px 10px #ffffff;
+}
+
+.preview-container {
+    margin-top: 15px;
+    padding: 10px;
+    border-radius: 12px;
+    background: #e0e5ec;
+    box-shadow: inset 3px 3px 5px #b8bec5,
+                inset -3px -3px 5px #ffffff;
+}
+
+#imagePreview {
+    border-radius: 8px;
+    margin: 0 auto;
+    display: block;
+} 
