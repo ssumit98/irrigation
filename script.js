@@ -118,7 +118,7 @@ document.getElementById('attendanceForm').addEventListener('submit', async funct
         };
 
         // Send to Google Sheets
-        const scriptURL = 'https://script.google.com/macros/s/AKfycbzT9Yrz_Yjb1modQfPGrQSVwCt1NcQXfKHN_5z5eKivbkDOc_3Eu_EkQjFYr75CZiv3/exec';
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbyRBMjfh3eNAetp59gpCrFdpDI96gyRqL13JdnARX2Fh3yfHI9uTrhtJFQTkzmpZsYz/exec';
         
         // Show loading state
         const submitButton = document.querySelector('.submit-btn');
@@ -126,13 +126,18 @@ document.getElementById('attendanceForm').addEventListener('submit', async funct
         submitButton.disabled = true;
 
         try {
-            // Convert form data to URL encoded string
-            const urlEncodedData = new URLSearchParams(formData).toString();
+            console.log('Submitting data:', formData); // Log the data being sent
             
-            // Create a hidden form and submit it
+            // Create a hidden iframe for the response
+            const iframe = document.createElement('iframe');
+            iframe.style.display = 'none';
+            document.body.appendChild(iframe);
+            
+            // Create a form and submit it through the iframe
             const form = document.createElement('form');
             form.method = 'POST';
             form.action = scriptURL;
+            form.target = iframe.name = 'hidden-iframe';
             
             // Add the data as a hidden input
             const hiddenField = document.createElement('input');
@@ -144,8 +149,11 @@ document.getElementById('attendanceForm').addEventListener('submit', async funct
             document.body.appendChild(form);
             form.submit();
             
-            // Clean up the form
-            document.body.removeChild(form);
+            // Clean up after submission
+            setTimeout(() => {
+                document.body.removeChild(form);
+                document.body.removeChild(iframe);
+            }, 1000);
             
             console.log('Form submitted to Google Sheets');
             alert('Form submitted successfully!');
