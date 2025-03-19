@@ -10,6 +10,8 @@
     <div class="container">
         <div class="form-card">
             <h1>Attendance Form</h1>
+            <div id="notification" class="notification"></div>
+            
             <form id="attendanceForm">
                 <div class="input-group">
                     <label for="name">Name</label>
@@ -34,7 +36,12 @@
                     </div>
                 </div>
 
-                <button type="submit" class="submit-btn">Submit</button>
+                <button type="submit" class="submit-btn">
+                    <div class="button-content">
+                        <span class="btn-text">Submit</span>
+                        <div class="loader"></div>
+                    </div>
+                </button>
             </form>
         </div>
     </div>

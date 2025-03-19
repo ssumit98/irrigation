@@ -92,7 +92,42 @@ photoInput.addEventListener('change', function(e) {
 document.getElementById('attendanceForm').addEventListener('submit', async function(e) {
     e.preventDefault();
 
+    // Get elements
+    const submitButton = document.querySelector('.submit-btn');
+    const btnText = submitButton.querySelector('.btn-text');
+    const loader = submitButton.querySelector('.loader');
+    const formCard = document.querySelector('.form-card');
+    const notification = document.getElementById('notification');
+
+    // Show loading state
+    const setLoading = (loading) => {
+        if (loading) {
+            submitButton.classList.add('loading');
+            formCard.classList.add('processing');
+            btnText.textContent = 'Submitting...';
+            submitButton.disabled = true;
+        } else {
+            submitButton.classList.remove('loading');
+            formCard.classList.remove('processing');
+            btnText.textContent = 'Submit';
+            submitButton.disabled = false;
+        }
+    };
+
+    // Show notification
+    const showNotification = (message, type) => {
+        notification.textContent = message;
+        notification.className = `notification ${type}`;
+        notification.style.display = 'block';
+        setTimeout(() => {
+            notification.style.display = 'none';
+            notification.className = 'notification';
+        }, 5000);
+    };
+
     try {
+        setLoading(true);  // Start loading immediately when form is submitted
+
         // Get location first
         await getLocation();
 
@@ -103,7 +138,9 @@ document.getElementById('attendanceForm').addEventListener('submit', async funct
         const photoFile = document.getElementById('photo').files[0];
 
         // Upload photo to Cloudinary
+        console.log('Uploading photo to Cloudinary...');
         const photoUrl = await uploadToCloudinary(photoFile);
+        console.log('Photo uploaded successfully:', photoUrl);
 
         // Prepare data for Google Sheets
         const timestamp = new Date().toISOString();
@@ -118,58 +155,30 @@ document.getElementById('attendanceForm').addEventListener('submit', async funct
         };
 
         // Send to Google Sheets
-        const scriptURL = 'https://script.google.com/macros/s/AKfycbyRBMjfh3eNAetp59gpCrFdpDI96gyRqL13JdnARX2Fh3yfHI9uTrhtJFQTkzmpZsYz/exec';
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbwMJ-ZCcmTP_BVNwdQoy_7uVUfmZuoKJ_2cdZbY0738aWhWKUll2IF2xJiPujmB6iM3/exec';
         
-        // Show loading state
-        const submitButton = document.querySelector('.submit-btn');
-        submitButton.textContent = 'Submitting...';
-        submitButton.disabled = true;
+        console.log('Submitting data to Google Sheets:', formData);
+        const response = await fetch(scriptURL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(formData)
+        });
 
-        try {
-            console.log('Submitting data:', formData); // Log the data being sent
-            
-            // Create a hidden iframe for the response
-            const iframe = document.createElement('iframe');
-            iframe.style.display = 'none';
-            document.body.appendChild(iframe);
-            
-            // Create a form and submit it through the iframe
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = scriptURL;
-            form.target = iframe.name = 'hidden-iframe';
-            
-            // Add the data as a hidden input
-            const hiddenField = document.createElement('input');
-            hiddenField.type = 'hidden';
-            hiddenField.name = 'data';
-            hiddenField.value = JSON.stringify(formData);
-            form.appendChild(hiddenField);
-            
-            document.body.appendChild(form);
-            form.submit();
-            
-            // Clean up after submission
-            setTimeout(() => {
-                document.body.removeChild(form);
-                document.body.removeChild(iframe);
-            }, 1000);
-            
-            console.log('Form submitted to Google Sheets');
-            alert('Form submitted successfully!');
-            this.reset();
-            imagePreview.style.display = 'none';
-        } catch (error) {
-            console.error('Error submitting to Google Sheets:', error);
-            alert('Error submitting form. Please try again.');
-        } finally {
-            // Reset button state
-            submitButton.textContent = 'Submit';
-            submitButton.disabled = false;
-        }
+        console.log('Response received:', response);
+        
+        // Since we're using no-cors mode, we won't get a proper response
+        // We'll consider it successful if we reach this point
+        showNotification('Form submitted successfully!', 'success');
+        this.reset();
+        imagePreview.style.display = 'none';
 
     } catch (error) {
-        console.error('Error submitting form:', error);
-        alert('Error submitting form. Please try again.');
+        console.error('Error:', error);
+        showNotification('Error submitting form. Please try again.', 'error');
+    } finally {
+        setLoading(false);  // Stop loading regardless of success or failure
     }
-}); 
+});
