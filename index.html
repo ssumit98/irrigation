@@ -9,31 +9,38 @@
 <body>
     <div class="container">
         <div class="form-card">
-            <h1>Attendance Form</h1>
+            <h2>Attendance Form</h2>
             <div id="notification" class="notification"></div>
             
             <form id="attendanceForm">
-                <div class="input-group">
+                <div class="form-group">
                     <label for="name">Name</label>
-                    <input type="text" id="name" name="name" placeholder="Enter your name" required>
+                    <input type="text" id="name" name="name" required>
                 </div>
 
-                <div class="input-group">
-                    <label for="inTime">In-time</label>
-                    <input type="time" id="inTime" name="inTime" required>
+                <div class="form-group">
+                    <label for="subdivision">Name of Subdivision</label>
+                    <input type="text" id="subdivision" name="subdivision" required>
                 </div>
 
-                <div class="input-group">
-                    <label for="outTime">Out-time</label>
-                    <input type="time" id="outTime" name="outTime" required>
+                <div class="form-group">
+                    <label>Attendance Type</label>
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="radio" id="inTime" name="attendanceType" value="in" required>
+                            <label for="inTime">In-Time</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="outTime" name="attendanceType" value="out" required>
+                            <label for="outTime">Out-Time</label>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="input-group">
+                <div class="form-group">
                     <label for="photo">Upload Photo</label>
                     <input type="file" id="photo" name="photo" accept="image/*" required>
-                    <div class="preview-container">
-                        <img id="imagePreview" src="#" alt="Preview" style="display: none; max-width: 200px;">
-                    </div>
+                    <div id="imagePreview" class="image-preview"></div>
                 </div>
 
                 <button type="submit" class="submit-btn">

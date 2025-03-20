@@ -14,6 +14,13 @@ const deviceInfo = {
     language: navigator.language
 };
 
+// Constants for localStorage
+const STORAGE_KEYS = {
+    NAME: 'attendance_name',
+    SUBDIVISION: 'attendance_subdivision',
+    EXPIRY: 'attendance_data_expiry'
+};
+
 // Function to get location
 function getLocation() {
     return new Promise((resolve, reject) => {
@@ -81,12 +88,123 @@ photoInput.addEventListener('change', function(e) {
     if (file) {
         const reader = new FileReader();
         reader.onload = function(e) {
+            // Create an image element if it doesn't exist
+            let previewImg = imagePreview.querySelector('img');
+            if (!previewImg) {
+                previewImg = document.createElement('img');
+                imagePreview.appendChild(previewImg);
+            }
+            
+            // Set the image source and display the preview
+            previewImg.src = e.target.result;
             imagePreview.style.display = 'block';
-            imagePreview.src = e.target.result;
         }
         reader.readAsDataURL(file);
     }
 });
+
+// Function to save data to localStorage with expiration
+function saveToLocalStorage(key, value) {
+    try {
+        localStorage.setItem(key, value);
+        // Set expiry date to 30 days from now
+        const expiryDate = new Date();
+        expiryDate.setDate(expiryDate.getDate() + 30);
+        localStorage.setItem(STORAGE_KEYS.EXPIRY, expiryDate.toISOString());
+    } catch (error) {
+        console.error('Error saving to localStorage:', error);
+    }
+}
+
+// Function to get data from localStorage
+function getFromLocalStorage(key) {
+    try {
+        // Check if data has expired
+        const expiryDate = localStorage.getItem(STORAGE_KEYS.EXPIRY);
+        if (expiryDate) {
+            const now = new Date();
+            const expiry = new Date(expiryDate);
+            if (now > expiry) {
+                // Clear expired data
+                localStorage.removeItem(STORAGE_KEYS.NAME);
+                localStorage.removeItem(STORAGE_KEYS.SUBDIVISION);
+                localStorage.removeItem(STORAGE_KEYS.EXPIRY);
+                return null;
+            }
+        }
+        return localStorage.getItem(key);
+    } catch (error) {
+        console.error('Error reading from localStorage:', error);
+        return null;
+    }
+}
+
+// Function to auto-fill form
+function autoFillForm() {
+    const name = getFromLocalStorage(STORAGE_KEYS.NAME);
+    const subdivision = getFromLocalStorage(STORAGE_KEYS.SUBDIVISION);
+
+    if (name) {
+        document.getElementById('name').value = name;
+    }
+    if (subdivision) {
+        document.getElementById('subdivision').value = subdivision;
+    }
+}
+
+// Call autoFillForm when page loads
+document.addEventListener('DOMContentLoaded', autoFillForm);
+
+// Function to get IST timestamp
+function getISTTimestamp() {
+    const now = new Date();
+    
+    // Get UTC time and add IST offset
+    const utcHours = now.getUTCHours();
+    const utcMinutes = now.getUTCMinutes();
+    const utcSeconds = now.getUTCSeconds();
+    
+    // Add 5 hours and 30 minutes for IST
+    let istHours = utcHours + 5;
+    let istMinutes = utcMinutes + 30;
+    let istSeconds = utcSeconds;
+    
+    // Handle overflow in minutes
+    if (istMinutes >= 60) {
+        istHours += Math.floor(istMinutes / 60);
+        istMinutes = istMinutes % 60;
+    }
+    
+    // Handle overflow in hours
+    if (istHours >= 24) {
+        istHours = istHours % 24;
+    }
+    
+    // Get the date components
+    let year = now.getUTCFullYear();
+    let month = now.getUTCMonth() + 1;
+    let day = now.getUTCDate();
+    
+    // Check if we need to roll over to the next day
+    if (utcHours >= 18) { // If UTC time is 6 PM or later
+        // Add one day
+        const nextDay = new Date(year, month - 1, day + 1);
+        year = nextDay.getFullYear();
+        month = nextDay.getMonth() + 1;
+        day = nextDay.getDate();
+    }
+    
+    // Format the date and time
+    const formattedMonth = String(month).padStart(2, '0');
+    const formattedDay = String(day).padStart(2, '0');
+    const formattedHours = String(istHours % 12 || 12).padStart(2, '0');
+    const formattedMinutes = String(istMinutes).padStart(2, '0');
+    const formattedSeconds = String(istSeconds).padStart(2, '0');
+    const ampm = istHours >= 12 ? 'PM' : 'AM';
+    
+    // Format the final string
+    return `${year}-${formattedMonth}-${formattedDay} ${formattedHours}:${formattedMinutes}:${formattedSeconds} ${ampm} IST`;
+}
 
 // Handle form submission
 document.getElementById('attendanceForm').addEventListener('submit', async function(e) {
@@ -133,20 +251,29 @@ document.getElementById('attendanceForm').addEventListener('submit', async funct
 
         // Get form values
         const name = document.getElementById('name').value;
-        const inTime = document.getElementById('inTime').value;
-        const outTime = document.getElementById('outTime').value;
+        const subdivision = document.getElementById('subdivision').value;
+        const attendanceType = document.querySelector('input[name="attendanceType"]:checked').value;
         const photoFile = document.getElementById('photo').files[0];
+
+        // Save name and subdivision to localStorage
+        saveToLocalStorage(STORAGE_KEYS.NAME, name);
+        saveToLocalStorage(STORAGE_KEYS.SUBDIVISION, subdivision);
+
+        // Set in/out time based on radio selection
+        const inTime = attendanceType === 'in' ? 'Yes' : '';
+        const outTime = attendanceType === 'out' ? 'Yes' : '';
 
         // Upload photo to Cloudinary
         console.log('Uploading photo to Cloudinary...');
         const photoUrl = await uploadToCloudinary(photoFile);
         console.log('Photo uploaded successfully:', photoUrl);
 
-        // Prepare data for Google Sheets
-        const timestamp = new Date().toISOString();
+        // Prepare data for Google Sheets with IST timestamp
+        const timestamp = getISTTimestamp();
         const formData = {
             timestamp,
             name,
+            subdivision,
             inTime,
             outTime,
             photoUrl,
@@ -155,7 +282,7 @@ document.getElementById('attendanceForm').addEventListener('submit', async funct
         };
 
         // Send to Google Sheets
-        const scriptURL = 'https://script.google.com/macros/s/AKfycbwMJ-ZCcmTP_BVNwdQoy_7uVUfmZuoKJ_2cdZbY0738aWhWKUll2IF2xJiPujmB6iM3/exec';
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbwYy_hRrCfJEO56whfNAxbmVLg6jByVpcMY6dxyGa-mnvG5nWjhYL_W-WeX1VGAlO9_/exec';
         
         console.log('Submitting data to Google Sheets:', formData);
         const response = await fetch(scriptURL, {
@@ -174,6 +301,9 @@ document.getElementById('attendanceForm').addEventListener('submit', async funct
         showNotification('Form submitted successfully!', 'success');
         this.reset();
         imagePreview.style.display = 'none';
+
+        // Re-fill the form with saved data after reset
+        autoFillForm();
 
     } catch (error) {
         console.error('Error:', error);

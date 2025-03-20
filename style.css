@@ -34,6 +34,113 @@ h1 {
     font-size: 28px;
 }
 
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #666;
+    font-weight: 500;
+}
+
+.form-group input[type="text"] {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    background: #e0e5ec;
+    box-shadow: inset 3px 3px 6px #b8bec5,
+                inset -3px -3px 6px #ffffff;
+    color: #333;
+    font-size: 16px;
+}
+
+.radio-group {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-top: 8px;
+    background: #e0e5ec;
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: inset 3px 3px 6px #b8bec5,
+                inset -3px -3px 6px #ffffff;
+}
+
+.radio-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    padding: 5px 10px;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+}
+
+.radio-option:hover {
+    background: rgba(74, 144, 226, 0.1);
+}
+
+.radio-option input[type="radio"] {
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border: 2px solid #4a90e2;
+    border-radius: 50%;
+    margin: 0;
+    cursor: pointer;
+    position: relative;
+    background: #e0e5ec;
+    box-shadow: 3px 3px 6px #b8bec5,
+                -3px -3px 6px #ffffff;
+}
+
+.radio-option input[type="radio"]:checked {
+    background: #4a90e2;
+}
+
+.radio-option input[type="radio"]:checked::after {
+    content: '';
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: white;
+    border-radius: 50%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.radio-option label {
+    margin: 0;
+    cursor: pointer;
+    color: #333;
+    font-size: 16px;
+}
+
+.image-preview {
+    margin-top: 15px;
+    padding: 10px;
+    border-radius: 12px;
+    background: #e0e5ec;
+    box-shadow: inset 3px 3px 5px #b8bec5,
+                inset -3px -3px 5px #ffffff;
+    display: none;
+}
+
+.image-preview img {
+    width: 100%;
+    max-width: 300px;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 3px 3px 6px #b8bec5,
+                -3px -3px 6px #ffffff;
+    display: block;
+    margin: 0 auto;
+}
+
 .input-group {
     margin-bottom: 25px;
 }
