@@ -312,3 +312,72 @@ document.getElementById('attendanceForm').addEventListener('submit', async funct
         setLoading(false);  // Stop loading regardless of success or failure
     }
 });
+
+// Service Worker Registration
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', async () => {
+        try {
+            const registration = await navigator.serviceWorker.register('./sw.js');
+            console.log('ServiceWorker registration successful:', registration);
+        } catch (err) {
+            console.error('ServiceWorker registration failed:', err);
+        }
+    });
+}
+
+// PWA Install Prompt
+let deferredPrompt;
+let installButton = null;
+
+function createInstallButton() {
+    if (installButton) return;
+    
+    installButton = document.createElement('button');
+    installButton.className = 'install-btn';
+    installButton.innerHTML = 'Install App';
+    installButton.style.display = 'none';
+    document.body.appendChild(installButton);
+
+    installButton.addEventListener('click', async () => {
+        if (!deferredPrompt) return;
+        // Show the install prompt
+        deferredPrompt.prompt();
+        // Wait for the user to respond to the prompt
+        const { outcome } = await deferredPrompt.userChoice;
+        // Clear the deferredPrompt variable
+        deferredPrompt = null;
+        // Hide the install button
+        installButton.style.display = 'none';
+    });
+}
+
+// Create the install button when the page loads
+document.addEventListener('DOMContentLoaded', () => {
+    createInstallButton();
+    autoFillForm();
+});
+
+// Listen for the beforeinstallprompt event
+window.addEventListener('beforeinstallprompt', (e) => {
+    console.log('beforeinstallprompt event fired');
+    // Prevent Chrome 67 and earlier from automatically showing the prompt
+    e.preventDefault();
+    // Stash the event so it can be triggered later
+    deferredPrompt = e;
+    // Show the install button
+    if (installButton) {
+        installButton.style.display = 'flex';
+        console.log('Install button shown');
+    }
+});
+
+// Listen for successful installation
+window.addEventListener('appinstalled', () => {
+    console.log('App installed successfully');
+    // Clear the deferredPrompt variable
+    deferredPrompt = null;
+    // Hide the install button
+    if (installButton) {
+        installButton.style.display = 'none';
+    }
+});

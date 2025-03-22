@@ -354,4 +354,47 @@
     transform: translateZ(25px);
   }
   
+  .install-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 10px 20px;
+    background: linear-gradient(145deg, #4a90e2, #357abd);
+    color: white;
+    border: none;
+    border-radius: 25px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .install-btn::before {
+    content: "⬇️";
+    font-size: 16px;
+  }
+  
+  .install-btn:hover {
+    background: linear-gradient(145deg, #357abd, #2868a0);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+  }
+  
+  .install-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  }
+  
+  @media (max-width: 480px) {
+    .install-btn {
+        padding: 8px 16px;
+        font-size: 13px;
+    }
+  }
+  
   
