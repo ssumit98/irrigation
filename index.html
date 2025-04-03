@@ -26,8 +26,25 @@
                 </div>
 
                 <div class="form-group">
+                    <label for="division">Division</label>
+                    <select id="division" name="division" required>
+                        <option value="">Select Division</option>
+                        <option value="Jayakwadi Irrigation subdivision No.5 ,Ch.sanbhajinagar">Jayakwadi Irrigation subdivision No.5 ,Ch.sanbhajinagar</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
                     <label for="subdivision">Name of Subdivision</label>
-                    <input type="text" id="subdivision" name="subdivision" required>
+                    <select id="subdivision" name="subdivision" required>
+                        <option value="">Select Subdivision</option>
+                        <option value="Jayakwadi Backwater Irrigation section,Paithan">Jayakwadi Backwater Irrigation section,Paithan</option>
+                        <option value="Jayakwadi Backwater Irrigation Section 1, Gangapur">Jayakwadi Backwater Irrigation Section 1, Gangapur</option>
+                        <option value="Jayakwadi Backwater Irrigation Section, Gangapur 2">Jayakwadi Backwater Irrigation Section, Gangapur 2</option>
+                        <option value="Jayakwadi Backwater Irrigation section,vaijapur">Jayakwadi Backwater Irrigation section,vaijapur</option>
+                        <option value="Bramhgwhan Lift Irrigation Section,Lohgaon">Bramhgwhan Lift Irrigation Section,Lohgaon</option>
+                    </select>
+                    <input type="text" id="subdivisionOther" name="subdivisionOther" placeholder="Enter Subdivision" style="display:none;" required>
                 </div>
 
                 <div class="form-group">
@@ -46,7 +63,7 @@
 
                 <div class="form-group">
                     <label for="photo">Upload Photo</label>
-                    <input type="file" id="photo" name="photo" accept="image/*" required>
+                    <input type="file" id="photo" name="photo" accept="image/*">
                     <div id="imagePreview" class="image-preview"></div>
                 </div>
 

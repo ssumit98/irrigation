@@ -21,6 +21,9 @@ const STORAGE_KEYS = {
     EXPIRY: 'attendance_data_expiry'
 };
 
+// Define the current version of your script
+const CURRENT_VERSION = '1.0.2';
+
 // Function to get location
 function getLocation() {
     return new Promise((resolve, reject) => {
@@ -139,16 +142,48 @@ function getFromLocalStorage(key) {
     }
 }
 
-// Function to auto-fill form
+// Function to auto-fill form and set placeholders
 function autoFillForm() {
     const name = getFromLocalStorage(STORAGE_KEYS.NAME);
+    const division = getFromLocalStorage('attendance_division');
     const subdivision = getFromLocalStorage(STORAGE_KEYS.SUBDIVISION);
 
     if (name) {
         document.getElementById('name').value = name;
     }
-    if (subdivision) {
-        document.getElementById('subdivision').value = subdivision;
+
+    const divisionSelect = document.getElementById('division');
+    const subdivisionSelect = document.getElementById('subdivision');
+    const subdivisionOtherInput = document.getElementById('subdivisionOther');
+
+    if (division) {
+        // Set the division select to the stored value
+        divisionSelect.value = division;
+
+        if (division === 'other') {
+            // Show the other subdivision input and set its value
+            subdivisionSelect.style.display = 'none';
+            subdivisionOtherInput.style.display = 'block';
+            subdivisionOtherInput.required = true;
+            subdivisionSelect.required = false;
+
+            if (subdivision) {
+                subdivisionOtherInput.value = subdivision;
+            }
+        } else {
+            // Show the regular subdivision select and set its value
+            subdivisionSelect.style.display = 'block';
+            subdivisionOtherInput.style.display = 'none';
+            subdivisionSelect.required = true;
+            subdivisionOtherInput.required = false;
+
+            if (subdivision) {
+                subdivisionSelect.value = subdivision;
+            }
+        }
+    } else {
+        // Ensure the placeholder option is selected
+        divisionSelect.selectedIndex = 0;
     }
 }
 
@@ -206,6 +241,29 @@ function getISTTimestamp() {
     return `${year}-${formattedMonth}-${formattedDay} ${formattedHours}:${formattedMinutes}:${formattedSeconds} ${ampm} IST`;
 }
 
+// Handle division and subdivision logic
+const divisionSelect = document.getElementById('division');
+const subdivisionSelect = document.getElementById('subdivision');
+const subdivisionOtherInput = document.getElementById('subdivisionOther');
+
+// Update subdivision options based on division selection
+function updateSubdivisionOptions() {
+    if (divisionSelect.value === 'Jayakwadi Irrigation subdivision No.5 ,Ch.sanbhajinagar') {
+        subdivisionSelect.style.display = 'block';
+        subdivisionOtherInput.style.display = 'none';
+        subdivisionSelect.required = true;
+        subdivisionOtherInput.required = false;
+    } else {
+        subdivisionSelect.style.display = 'none';
+        subdivisionOtherInput.style.display = 'block';
+        subdivisionSelect.required = false;
+        subdivisionOtherInput.required = true;
+    }
+}
+
+// Event listener for division change
+divisionSelect.addEventListener('change', updateSubdivisionOptions);
+
 // Handle form submission
 document.getElementById('attendanceForm').addEventListener('submit', async function(e) {
     e.preventDefault();
@@ -251,28 +309,34 @@ document.getElementById('attendanceForm').addEventListener('submit', async funct
 
         // Get form values
         const name = document.getElementById('name').value;
-        const subdivision = document.getElementById('subdivision').value;
+        const division = divisionSelect.value;
+        const subdivision = division === 'other' ? subdivisionOtherInput.value : subdivisionSelect.value;
         const attendanceType = document.querySelector('input[name="attendanceType"]:checked').value;
         const photoFile = document.getElementById('photo').files[0];
 
-        // Save name and subdivision to localStorage
+        // Save name, division, and subdivision to localStorage
         saveToLocalStorage(STORAGE_KEYS.NAME, name);
-        saveToLocalStorage(STORAGE_KEYS.SUBDIVISION, subdivision);
+        saveToLocalStorage('attendance_division', division);
+        saveToLocalStorage('attendance_subdivision', subdivision);
 
         // Set in/out time based on radio selection
         const inTime = attendanceType === 'in' ? 'Yes' : '';
         const outTime = attendanceType === 'out' ? 'Yes' : '';
 
-        // Upload photo to Cloudinary
-        console.log('Uploading photo to Cloudinary...');
-        const photoUrl = await uploadToCloudinary(photoFile);
-        console.log('Photo uploaded successfully:', photoUrl);
+        let photoUrl = '';
+        if (photoFile) {
+            // Upload photo to Cloudinary
+            console.log('Uploading photo to Cloudinary...');
+            photoUrl = await uploadToCloudinary(photoFile);
+            console.log('Photo uploaded successfully:', photoUrl);
+        }
 
         // Prepare data for Google Sheets with IST timestamp
         const timestamp = getISTTimestamp();
         const formData = {
             timestamp,
             name,
+            division,
             subdivision,
             inTime,
             outTime,
@@ -281,8 +345,10 @@ document.getElementById('attendanceForm').addEventListener('submit', async funct
             deviceInfo: JSON.stringify(deviceInfo)
         };
 
+        console.log('Form data being sent:', formData);
+
         // Send to Google Sheets
-        const scriptURL = 'https://script.google.com/macros/s/AKfycbwYy_hRrCfJEO56whfNAxbmVLg6jByVpcMY6dxyGa-mnvG5nWjhYL_W-WeX1VGAlO9_/exec';
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbzxwIUP-YuudflkQM9VGvzVhDOIQvVxJ0o4oy_ajVvt4svKm7B6-_AEhi3yTwDBXwcd/exec';
         
         console.log('Submitting data to Google Sheets:', formData);
         const response = await fetch(scriptURL, {
@@ -353,8 +419,9 @@ function createInstallButton() {
 
 // Create the install button when the page loads
 document.addEventListener('DOMContentLoaded', () => {
-    createInstallButton();
+    updateSubdivisionOptions();
     autoFillForm();
+    createInstallButton();
 });
 
 // Listen for the beforeinstallprompt event
@@ -381,3 +448,35 @@ window.addEventListener('appinstalled', () => {
         installButton.style.display = 'none';
     }
 });
+
+// Function to clear local storage, session storage, and cookies
+function clearStorageAndCookies() {
+  // Clear local storage
+  localStorage.clear();
+
+  // Clear session storage
+  sessionStorage.clear();
+
+  // Clear cookies
+  document.cookie.split(";").forEach((cookie) => {
+    const eqPos = cookie.indexOf("=");
+    const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
+    document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
+  });
+}
+
+// Function to check version and clear storage if needed
+function checkVersion() {
+  const storedVersion = localStorage.getItem('version');
+
+  if (storedVersion !== CURRENT_VERSION) {
+    // Versions don't match, clear storage and cookies
+    clearStorageAndCookies();
+
+    // Update the version in local storage
+    localStorage.setItem('version', CURRENT_VERSION);
+  }
+}
+
+// Run the version check when the site loads
+window.onload = checkVersion;

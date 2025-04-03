@@ -103,6 +103,10 @@
     background: linear-gradient(145deg, #5464b0, #6474cc);
   }
   
+  .form-group input[type="text"]::placeholder {
+    color: rgba(255, 255, 255, 0.7);
+  }
+  
   .radio-group {
     display: flex;
     align-items: center;
@@ -395,6 +399,25 @@
         padding: 8px 16px;
         font-size: 13px;
     }
+  }
+  
+  .form-group select {
+    width: 100%;
+    padding: 16px;
+    border: none;
+    border-radius: 12px;
+    background: linear-gradient(145deg, #5a68b3, #6a78d1);
+    box-shadow: inset 8px 8px 16px rgba(50, 50, 93, 0.3), inset -8px -8px 16px rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+    font-size: 16px;
+    transition: all 0.3s ease;
+    appearance: none;
+  }
+  
+  .form-group select:focus {
+    box-shadow: inset 4px 4px 8px rgba(50, 50, 93, 0.4), inset -4px -4px 8px rgba(255, 255, 255, 0.3);
+    outline: none;
+    background: linear-gradient(145deg, #5464b0, #6474cc);
   }
   
   
