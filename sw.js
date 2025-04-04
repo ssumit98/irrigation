@@ -1,4 +1,5 @@
 const CACHE_NAME = 'attendance-form-v1';
+// v1.1
 const urlsToCache = [
     './',
     './index.html',
